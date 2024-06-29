@@ -8,7 +8,7 @@ CFLAGS = -Wall -g -O0 -static -static-libgcc -static-libstdc++ -fPIC #-Wl,-subsy
 SRC_DIR = src
 OBJ_DIR = obj
 INCLUDE_DIR = ./dep/raylib/include  # Directory for header files
-BUILD_DIR = build
+BUILD_DIR = bin
 LIB_DIR = ./dep/raylib/lib  # Directory for static libraries
 
 # Source files
