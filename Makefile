@@ -2,7 +2,7 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall -g -O0
+CFLAGS = -Wall -g -O0 -static -static-libgcc -static-libstdc++ -fPIC #-Wl,-subsystem,windows
 
 # Directories
 SRC_DIR = src
@@ -24,7 +24,10 @@ OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 LIBS = -L$(LIB_DIR) -lraylib -lgdi32 -lwinmm # Replace "libexample.a" with your library name
 
 # Executable name
-TARGET = $(BUILD_DIR)/main
+TARGET = $(BUILD_DIR)/tetris
+
+# Dependency files
+DEPS = $(OBJS:.o=.d)
 
 # Rule to build the target
 $(TARGET): $(OBJS)
@@ -34,7 +37,10 @@ $(TARGET): $(OBJS)
 # Rule to build object files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(OBJ_DIR)
-	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE) -MMD -c $< -o $@
+
+# Include dependency files
+-include $(DEPS)
 
 # Clean up build files
 clean:

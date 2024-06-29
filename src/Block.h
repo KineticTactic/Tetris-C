@@ -1,15 +1,14 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
-#include "raylib.h"
+#include <raylib.h>
 
-// #include "BlockData.h"
-
-typedef struct
-{
-	int x, y;
-	float originX, originY;
-	int data[16];
+typedef struct {
+    int x, y;
+    int rotation;
+    float originX, originY;
+    int type;
+    int data[16];
 } Block;
 
 Block CreateBlock(int id);

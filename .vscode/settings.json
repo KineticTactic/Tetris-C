@@ -1,6 +1,12 @@
 {
     "files.associations": {
         "stdio.h": "c",
-        "raymath.h": "c"
+        "raymath.h": "c",
+        "random": "c",
+        "colors.h": "c",
+        "board.h": "c",
+        "block.h": "c",
+        "raylib.h": "c",
+        "game.h": "c"
     }
 }

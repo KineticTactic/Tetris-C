@@ -3,14 +3,11 @@
 
 #include "raylib.h"
 
-//array of colors
+// array of colors
 static Color colors[] = {
-	RED,
-	BLUE,
-	GREEN,
-	YELLOW,
-	ORANGE,
-	PURPLE,
+    RED, BLUE, GREEN, (Color){254, 213, 0, 255}, ORANGE, PURPLE,
 };
+
+#define NUM_COLORS (sizeof(colors) / sizeof(Color))
 
 #endif

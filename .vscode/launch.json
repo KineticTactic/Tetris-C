@@ -8,7 +8,7 @@
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/main.exe",
+            "program": "${workspaceFolder}/build/tetris.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
@@ -20,7 +20,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/main.exe",
+            "program": "${workspaceFolder}/build/tetris.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
@@ -40,6 +40,7 @@
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
+                // { "text": "set output-radix 16" }
             ]
         }
     ]
