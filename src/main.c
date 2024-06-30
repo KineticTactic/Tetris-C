@@ -2,6 +2,7 @@
 #include <raymath.h>
 #include <stdio.h>
 
+#include "Audio.h"
 #include "Game.h"
 
 int main() {
@@ -11,15 +12,22 @@ int main() {
     InitWindow(screenWidth, screenHeight, "Tetris");
     SetTargetFPS(60);
 
+    InitAudio();
+
+    Texture2D tileSpriteSheet = LoadTexture("assets/tiles.png");
+    SetTextureFilter(tileSpriteSheet, TEXTURE_FILTER_POINT);
+
     State *state = InitGameState();
 
     bool alreadyTurned = false;
     bool alreadyMoved = false;
-    double lastTick = GetTime();
-    double gameSpeed = 0.5;
+    bool alreadyDropped = false;
     double lastMovementInput = GetTime();
+    bool paused = false;
 
     while (!WindowShouldClose()) {
+        UpdateMusic();
+
         if (IsKeyDown(KEY_UP) && !alreadyTurned) {
             RotateFallingBlock(state, 1);
             alreadyTurned = true;
@@ -40,10 +48,19 @@ int main() {
                    GetTime() - lastMovementInput > 0.1)
             alreadyMoved = false;
 
+        if (IsKeyDown(KEY_SPACE) && !alreadyDropped) {
+            DropFallingBlock(state);
+            alreadyDropped = true;
+        } else if (!IsKeyDown(KEY_SPACE) && alreadyDropped)
+            alreadyDropped = false;
+
+        if (IsKeyPressed(KEY_P))
+            paused = !paused;
+
         if (IsKeyDown(KEY_DOWN))
-            gameSpeed = 0.08;
+            GameSpeedUp(state);
         else
-            gameSpeed = 0.5;
+            GameSpeedNormal(state);
 
         // Restart game
         if (IsKeyDown(KEY_R)) {
@@ -51,16 +68,12 @@ int main() {
             state = InitGameState();
         }
 
-        double currentTime = GetTime();
-        if (currentTime - lastTick >= gameSpeed) {
-            Tick(state);
-            lastTick = currentTime;
-        }
+        UpdateGame(state);
 
         // Rendering
         BeginDrawing();
         ClearBackground((Color){31, 31, 31, 255});
-        RenderGame(state, screenWidth, screenHeight);
+        RenderGame(state, screenWidth, screenHeight, tileSpriteSheet);
         EndDrawing();
     }
 

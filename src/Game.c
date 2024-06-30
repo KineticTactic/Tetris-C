@@ -2,14 +2,22 @@
 
 #include <stdlib.h>
 
+#include "Audio.h"
 #include "data.h"
 
 State *InitGameState() {
     State *state = (State *)malloc(sizeof(State));
     state->board = CreateBoard(10, 20);
     state->fallingBlock = CreateRandomBlock();
+    state->shadowBlock = state->fallingBlock;
     state->score = 0;
     state->isGameOver = false;
+    state->isClearingRows = false;
+    state->lastTickTime = GetTime();
+    state->lastClearTime = GetTime();
+    state->gameSpeed = 0.5;
+    state->rowClearSpeed = 0.02;
+    CalculateFallingBlockShadow(state);
     return state;
 }
 
@@ -18,16 +26,47 @@ void DestroyGame(State *state) {
     free(state);
 }
 
-void Tick(State *state) {
+void Tick(State *state, bool hardDrop) {
     state->fallingBlock.y++;
 
-    if (IsFallingBlockOverlapping(state)) {
+    if (IsBlockOverlappingBoard(&state->board, &state->fallingBlock)) {
         state->fallingBlock.y--;
         AddBlockToBoard(state);
-        state->fallingBlock = CreateRandomBlock();
-        if (IsFallingBlockOverlapping(state))
-            state->isGameOver = true;
+
+        if (hardDrop)
+            PlaySoundEffect(HARD_DROP);
+        else
+            PlaySoundEffect(SOFT_DROP);
+
+        int rowsCleared = ClearRows(&state->board);
+
+        if (rowsCleared > 0) {
+            state->score += rowsCleared * 100;
+            state->isClearingRows = true;
+            state->lastClearTime = GetTime();
+            PlaySoundEffect(CLEAR);
+            return;
+        }
+
+        CreateFallingBlock(state);
     }
+
+    CalculateFallingBlockShadow(state);
+}
+
+void GameSpeedUp(State *state) {
+    state->gameSpeed = 0.07;
+}
+
+void GameSpeedNormal(State *state) {
+    state->gameSpeed = 0.5;
+}
+
+void CreateFallingBlock(State *state) {
+    state->fallingBlock = CreateRandomBlock();
+    state->shadowBlock = state->fallingBlock;
+    if (IsBlockOverlappingBoard(&state->board, &state->fallingBlock))
+        state->isGameOver = true;
 }
 
 void AddBlockToBoard(State *state) {
@@ -41,34 +80,48 @@ void AddBlockToBoard(State *state) {
             }
         }
     }
-    state->score += ClearRows(&state->board);
 }
 
-bool IsFallingBlockOverlapping(State *state) {
+bool IsBlockOverlappingBoard(Board *board, Block *block) {
     for (int x = 0; x < 4; x++) {
         for (int y = 0; y < 4; y++) {
-            if (GetBlockCell(&state->fallingBlock, x, y) == 0)
+            if (GetBlockCell(block, x, y) == 0)
                 continue;
 
-            int boardX = state->fallingBlock.x + x;
-            int boardY = state->fallingBlock.y + y;
+            int boardX = block->x + x;
+            int boardY = block->y + y;
 
             // Check if cell is outside the board
-            if (boardX < 0 || boardX >= state->board.width || boardY < 0 ||
-                boardY >= state->board.height)
+            if (boardX < 0 || boardX >= board->width || boardY < 0 ||
+                boardY >= board->height)
                 return true;
 
-            if (GetCell(&state->board, boardX, boardY) != 0)
+            if (GetCell(board, boardX, boardY) != 0)
                 return true;
         }
     }
     return false;
 }
 
+void CalculateFallingBlockShadow(State *state) {
+    state->shadowBlock = state->fallingBlock;
+    while (!IsBlockOverlappingBoard(&state->board, &state->shadowBlock)) {
+        state->shadowBlock.y++;
+    }
+    state->shadowBlock.y--;
+}
+
+void DropFallingBlock(State *state) {
+    state->fallingBlock.y = state->shadowBlock.y;
+    Tick(state, true);
+}
+
 void MoveFallingBlock(State *state, int direction) {
     state->fallingBlock.x += direction;
-    if (IsFallingBlockOverlapping(state))
+    if (IsBlockOverlappingBoard(&state->board, &state->fallingBlock))
         state->fallingBlock.x -= direction;
+    CalculateFallingBlockShadow(state);
+    // PlaySoundEffect(MOVE);
 }
 
 void RotateFallingBlock(State *state, int direction) {
@@ -88,8 +141,11 @@ void RotateFallingBlock(State *state, int direction) {
         state->fallingBlock.x += relativeOffset.x;
         state->fallingBlock.y += relativeOffset.y;
 
-        if (!IsFallingBlockOverlapping(state))
+        if (!IsBlockOverlappingBoard(&state->board, &state->fallingBlock)) {
+            CalculateFallingBlockShadow(state);
+            PlaySoundEffect(ROTATE);
             return;
+        }
 
         state->fallingBlock.x -= relativeOffset.x;
         state->fallingBlock.y -= relativeOffset.y;
@@ -99,15 +155,41 @@ void RotateFallingBlock(State *state, int direction) {
     RotateBlock(&state->fallingBlock, -direction);
 }
 
-void RenderGame(State *state, int screenWidth, int screenHeight) {
-    RenderBoard(&state->board, screenWidth, screenHeight);
-    RenderBlock(&state->fallingBlock);
+void UpdateGame(State *state) {
+    double currentTime = GetTime();
+
+    if (state->isClearingRows &&
+        currentTime - state->lastClearTime >= state->rowClearSpeed) {
+        bool clearingDone = ContinueClearingRows(&state->board);
+        if (clearingDone) {
+            state->isClearingRows = false;
+            CreateFallingBlock(state);
+        }
+
+        state->lastClearTime = currentTime;
+        return;
+    }
+
+    if (state->isGameOver)
+        return;
+
+    if (currentTime - state->lastTickTime >= state->gameSpeed) {
+        Tick(state, false);
+        state->lastTickTime = currentTime;
+    }
+}
+
+void RenderGame(State *state, int screenWidth, int screenHeight,
+                Texture2D tileSpriteSheet) {
+    RenderBoard(&state->board, screenWidth, screenHeight, tileSpriteSheet);
+    RenderBlock(&state->fallingBlock, tileSpriteSheet, 1.0);
+    RenderBlock(&state->shadowBlock, tileSpriteSheet, 0.2);
 
     DrawText(TextFormat("Score: %d", state->score), 10, 10, 20, WHITE);
 
     if (state->isGameOver) {
         DrawRectangle(screenWidth / 2 - 150, screenHeight / 2 - 75, 300, 120,
-                      Fade(BLACK, 0.3));
+                      Fade(BLACK, 0.5));
         DrawText("GAME OVER!", screenWidth / 2 - 125, screenHeight / 2 - 50, 40,
                  RED);
         // Write press R to restart

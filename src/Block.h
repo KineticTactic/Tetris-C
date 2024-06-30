@@ -15,6 +15,6 @@ Block CreateBlock(int id);
 Block CreateRandomBlock();
 int GetBlockCell(Block *block, int x, int y);
 void RotateBlock(Block *block, int direction);
-void RenderBlock(Block *block);
+void RenderBlock(Block *block, Texture2D tileSpriteSheet, float opacity);
 
 #endif

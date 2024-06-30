@@ -15,7 +15,7 @@ Block CreateBlock(int id) {
     Block block;
     memcpy(block.data, BLOCK_LAYOUTS[id], sizeof(int) * BLOCK_LAYOUT_SIZE);
 
-    int color = GetRandomValue(1, 6);
+    int color = GetRandomValue(1, 7);
     for (int i = 0; i < 16; i++) {
         block.data[i] *= color;
     }
@@ -65,13 +65,18 @@ void RotateBlock(Block *block, int direction) {
     memcpy(block->data, rotated, sizeof(int) * 16);
 }
 
-void RenderBlock(Block *block) {
+void RenderBlock(Block *block, Texture2D tileSpriteSheet, float opacity) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            if (GetBlockCell(block, i, j) == 0)
+            int cell = GetBlockCell(block, i, j);
+            if (cell == 0)
                 continue;
-            DrawRectangle((block->x + i) * 30, (block->y + j) * 30, 30, 30,
-                          colors[GetBlockCell(block, i, j) - 1]);
+            // DrawRectangle((block->x + i) * 30, (block->y + j) * 30, 30, 30,
+            //               colors[GetBlockCell(block, i, j) - 1]);
+            DrawTexturePro(
+                tileSpriteSheet, (Rectangle){(cell - 1) * 16, 0, 16, 16},
+                (Rectangle){(block->x + i) * 30, (block->y + j) * 30, 30, 30},
+                (Vector2){0, 0}, 0, Fade(WHITE, opacity));
         }
     }
     // Draw border for whole 4x4 grid
