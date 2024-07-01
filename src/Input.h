@@ -5,6 +5,6 @@
 
 #include "Game.h"
 
-void input_handle(State *state);
+void input_handle(State **state);
 
 #endif
