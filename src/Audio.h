@@ -3,17 +3,10 @@
 
 #include <raylib.h>
 
-enum SoundType {
-	CLEAR,
-	GAME_OVER,
-	MOVE,
-	HARD_DROP,
-	SOFT_DROP,
-	ROTATE
-};
+enum SoundType { CLEAR, GAME_OVER, MOVE, HARD_DROP, SOFT_DROP, ROTATE };
 
-void InitAudio();
-void PlaySoundEffect(enum SoundType soundType);
-void UpdateMusic();
+void audio_init();
+void audio_play(enum SoundType soundType);
+void audio_update();
 
 #endif

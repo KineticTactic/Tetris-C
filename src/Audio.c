@@ -6,7 +6,7 @@ Sound soundEffects[6];
 
 Music tetrisSwing;
 
-void InitAudio() {
+void audio_init() {
     InitAudioDevice();
 
     tetrisSwing = LoadMusicStream("assets/tetris-swing.wav");
@@ -20,10 +20,10 @@ void InitAudio() {
     soundEffects[ROTATE] = LoadSound("assets/rotate.wav");
 }
 
-void PlaySoundEffect(enum SoundType soundType) {
+void audio_play(enum SoundType soundType) {
     PlaySound(soundEffects[soundType]);
 }
 
-void UpdateMusic() {
+void audio_update() {
     UpdateMusicStream(tetrisSwing);
 }

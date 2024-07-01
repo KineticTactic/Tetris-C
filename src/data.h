@@ -3,7 +3,11 @@
 
 #include "Block.h"
 
-enum BLOCK_TYPES {
+#define NUM_BLOCK_COLORS 7
+#define NUM_BLOCK_TYPES 7
+#define BLOCK_LAYOUT_SIZE 16
+
+enum BlockTypes {
     I_PIECE = 0,
     J_PIECE,
     L_PIECE,
@@ -22,8 +26,6 @@ static const int BLOCK_LAYOUTS[7][16] = {
     {0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // T
     {1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // Z
 };
-
-#define BLOCK_LAYOUT_SIZE 16
 
 static const float BLOCK_ORIGINS[7][2] = {
     {2.0f, 2.0f}, // I

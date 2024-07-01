@@ -7,6 +7,9 @@
         "board.h": "c",
         "block.h": "c",
         "raylib.h": "c",
-        "game.h": "c"
+        "game.h": "c",
+        "input.h": "c",
+        "data.h": "c",
+        "string.h": "c"
     }
 }
