@@ -2,7 +2,7 @@
 
 This is a very simple tetris clone written in C (mostly to practice my C skills). It uses [raylib](https://www.raylib.com/) to render graphics.
 
-<img src="assets/tetris.gif" width="200">
+<img src="assets/tetris-demo.gif">
 
 ## Building the source code
 

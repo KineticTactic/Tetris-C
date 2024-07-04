@@ -23,10 +23,6 @@ int main() {
     while (!WindowShouldClose()) {
         // Input handling
         input_handle(&state);
-        if (IsKeyPressed(KEY_R)) {
-            // game_destroy(state);
-            // state = game_init();
-        }
 
         // Updates
         audio_update();
